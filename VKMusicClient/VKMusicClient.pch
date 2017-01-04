@@ -1,0 +1,47 @@
+//
+//  VKMusicClient.pch
+//  VKMusicClient
+//
+//  Created by Boris on 3/17/16.
+//  Copyright © 2016 BZ. All rights reserved.
+//
+
+#ifndef VKMusicClient_pch
+#define VKMusicClient_pch
+
+#import "BZExtensionsManager.h"
+
+#define keySongsTableBackgroundColor @"DBDBDB"
+#define keyLoadSongsToCoreData @"LoadSongsToCoreData"
+#define keyHeveticaNeueCyr_Light @"HelveticaNeueCyr-Light"
+#define keyHeveticaNeueCyr_Roman @"HelveticaNeueCyr-Roman"
+#define keyContentLeftInset  @"13 11 10 10"
+#define keyOrangeColor  @"f7941d"
+#define keyCaptchaID  @"captcha_sid"
+#define keyCaptchaImg  @"captcha_img"
+#define keyNavigationBarHeight  @"82 75 65 65"
+#define keyAppDirectoryName  @"VKPlayerDirectory"
+#define keySearchImageLeftInset @"11 10 8 8"
+#define keySearchButtonImageName @"icon-filter2"
+#define keySearchButtonMaxXInset @"16 14 12 12"
+#define keySearchButton_SearchFieldInset @"11 10 9 9"
+#define keySearchTextFieldHeight  @"36 33 28 28"
+#define keyBottomSeparatorHeight  @"7 5 5 5"
+#define keyCellHeight  @"97 88 75 75"
+#define keyCellDeleteButtonDidTouchedUpInside @"keyCellDeleteButtonDidTouchedUpInside"
+#define keyCheckmarkImageName @"checkmark-xxl"
+#define keyOkayButtonWidthHeight @"35 30 28 28"
+#define keyNewPlayListWasCreated @"keyNewPlayListWasCreated"
+#define keyBackButtonImageName @"icon_shape"
+#define keyPlayListCellHeight  @"70 65 55 45"
+
+#define keyLoginVCLoadNotification @"LoginVCLoadNotification"
+#define keyPlayListSongsChangedNotification @"keyPlayListSongsChangedNotification"
+#define keyDetailPlayListVCTextChangedNotification @"keyDetailPlayListVCTextChangedNotification"
+#define keyDetailPlayListBackPressedNotification @"keyDetailPlayListBackPressedNotification"
+#define keySongLoadProgressNotification @"keyCellLoadProgressNotification"
+#define keySongDidLoadNotification @"keySongDidLoadNotification"
+#define keyLoadSongPrefix @"songLoad"
+#define keyPopularityChangedNotification @"keyPopularityChangedNotification"
+
+#endif /* VKMusicClient_pch */

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9525" systemVersion="15D21" minimumToolsVersion="Automatic">
+    <entity name="PlayList" representedClassName="PlayList" syncable="YES">
+        <attribute name="theCreationDate" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="thePlayListName" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="theSongIndexSet" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="SongIndex" inverseName="thePlayList" inverseEntity="SongIndex" syncable="YES"/>
+        <relationship name="theSongSet" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Song" inverseName="theSongPlayListSet" inverseEntity="Song" syncable="YES"/>
+    </entity>
+    <entity name="Song" representedClassName="Song" syncable="YES">
+        <attribute name="theArtist" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="theDuration" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="theFileURLString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="theIndex" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="theLoadDate" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="theLoadedProgress" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="theOwnerID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="thePopularity" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="theSongID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="theTitle" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="theURLString" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="theSongIndex" optional="YES" toMany="YES" deletionRule="Cascade" destinationEntity="SongIndex" inverseName="theSong" inverseEntity="SongIndex" syncable="YES"/>
+        <relationship name="theSongPlayListSet" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="PlayList" inverseName="theSongSet" inverseEntity="PlayList" syncable="YES"/>
+    </entity>
+    <entity name="SongIndex" representedClassName="SongIndex" syncable="YES">
+        <attribute name="theIndexValue" optional="YES" attributeType="String" syncable="YES"/>
+        <relationship name="thePlayList" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="PlayList" inverseName="theSongIndexSet" inverseEntity="PlayList" syncable="YES"/>
+        <relationship name="theSong" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Song" inverseName="theSongIndex" inverseEntity="Song" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="PlayList" positionX="-234" positionY="279" width="128" height="103"/>
+        <element name="Song" positionX="-63" positionY="-18" width="128" height="240"/>
+        <element name="SongIndex" positionX="88" positionY="261" width="128" height="88"/>
+    </elements>
+</model>
