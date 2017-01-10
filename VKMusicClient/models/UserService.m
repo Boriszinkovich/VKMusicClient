@@ -244,46 +244,73 @@ NSString * const keyCaptchaError = @"error";
               }
               [BZExtensionsManager methodAsyncMainWithBlock:^
                {
-                   NSManagedObjectContext *theManagedObjectContext = [DataManager sharedInstance].managedObjectContext;
-                   NSFetchRequest *theFetchRequest = [NSFetchRequest new];
-                   theFetchRequest.entity = [NSEntityDescription entityForName:sfc([Song class])
-                                                        inManagedObjectContext:theManagedObjectContext];
-                   theFetchRequest.includesSubentities = NO;
-                   theFetchRequest.propertiesToFetch = @[sfs(@selector(theSongID))];
+                   NSManagedObjectContext *temporaryContext = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+                   NSManagedObjectContext *mainMOC = [DataManager sharedInstance].managedObjectContext;
+                   temporaryContext.parentContext = mainMOC;
                    
-                   NSMutableArray *theCurrentSongArray = [theManagedObjectContext
-                                                          executeFetchRequest:theFetchRequest
-                                                          error:nil].mutableCopy;
-                   for (int i = 0; i < theLoadedJSONArray.count; i++)
-                   {
-                       NSDictionary *theDictionary = theLoadedJSONArray[i];
+                   [temporaryContext performBlock:^{
+                       NSManagedObjectContext *theManagedObjectContext = [DataManager sharedInstance].managedObjectContext;
+                       NSFetchRequest *theFetchRequest = [NSFetchRequest new];
+                       theFetchRequest.entity = [NSEntityDescription entityForName:sfc([Song class])
+                                                            inManagedObjectContext:theManagedObjectContext];
+                       theFetchRequest.includesSubentities = NO;
+                       theFetchRequest.propertiesToFetch = @[sfs(@selector(theSongID))];
                        
-                       NSPredicate *thePredicate = [NSPredicate predicateWithFormat:@"%K == %@", sfs(@selector(theSongID)), [NSString stringWithFormat:@"%@", theDictionary[keySongIdString]]];
-                       Song *theNewSong = [theCurrentSongArray filteredArrayUsingPredicate:thePredicate].firstObject;
-                       if (theNewSong)
+                       NSMutableArray *theCurrentSongArray = [theManagedObjectContext
+                                                              executeFetchRequest:theFetchRequest
+                                                              error:nil].mutableCopy;
+                       for (int i = 0; i < theLoadedJSONArray.count; i++)
                        {
-                           [theNewSong methodFillWithDictionary:theDictionary];
-                           theNewSong.theIndex = [NSString stringWithFormat:@"%zd", i];
-                           [theCurrentSongArray removeObjectAtIndex:[theCurrentSongArray indexOfObject:theNewSong]];
+                           NSDictionary *theDictionary = theLoadedJSONArray[i];
+                           
+                           NSPredicate *thePredicate = [NSPredicate predicateWithFormat:@"%K == %@", sfs(@selector(theSongID)), [NSString stringWithFormat:@"%@", theDictionary[keySongIdString]]];
+                           Song *theNewSong = [theCurrentSongArray filteredArrayUsingPredicate:thePredicate].firstObject;
+                           if (theNewSong)
+                           {
+                               [theNewSong methodFillWithDictionary:theDictionary];
+                               theNewSong.theIndex = [NSString stringWithFormat:@"%zd", i];
+                               [theCurrentSongArray removeObjectAtIndex:[theCurrentSongArray indexOfObject:theNewSong]];
+                           }
+                           else
+                           {
+                               theNewSong = [Song methodInitWithDictionary:theDictionary];
+                               theNewSong.theIndex = [NSString stringWithFormat:@"%zd", i];
+                           }
                        }
-                       else
+                       for (Song *theSong in theCurrentSongArray)
                        {
-                           theNewSong = [Song methodInitWithDictionary:theDictionary];
-                           theNewSong.theIndex = [NSString stringWithFormat:@"%zd", i];
+                           if (isEqual(theSong.theOwnerID, [UserDefaults sharedInstance].theUserIdString))
+                           {
+                               [theSong.managedObjectContext deleteObject:theSong];
+                           }
                        }
-                   }
-                   for (Song *theSong in theCurrentSongArray)
-                   {
-                       if (isEqual(theSong.theOwnerID, [UserDefaults sharedInstance].theUserIdString))
+                       if (theManagedObjectContext.hasChanges)
                        {
-                           [theSong.managedObjectContext deleteObject:theSong];
+                           [theManagedObjectContext save:nil];
                        }
-                   }
-                   if (theManagedObjectContext.hasChanges)
-                   {
-                       [theManagedObjectContext save:nil];
-                   }
-                   theCompletionBlock(theError);
+                       
+                       // do something that takes some time asynchronously using the temp context
+                       
+                       // push to parent
+                       NSError *error;
+                       if (![temporaryContext save:&error])
+                       {
+                           // handle error
+                       }
+                       
+                       // save parent to disk asynchronously
+                       [mainMOC performBlock:^{
+                           NSError *error;
+                           if (![mainMOC save:&error])
+                           {
+                               // handle error
+                           }
+                           else
+                           {
+                               theCompletionBlock(theError);
+                           }
+                       }];
+                   }];
                }];
           }];
      }];
@@ -306,7 +333,7 @@ NSString * const keyCaptchaError = @"error";
 {
     BZAssert(theTaskKey && theCompletionBlock && theCount && theSearchString);
     theSearchString = [theSearchString stringByTrimmingCharactersInSet:
-                               [NSCharacterSet whitespaceCharacterSet]];
+                       [NSCharacterSet whitespaceCharacterSet]];
     
     NSString *theUserIdString = [UserDefaults sharedInstance].theUserIdString;
     NSString *theAccessTokenString = [UserDefaults sharedInstance].theAccessToken;
@@ -322,7 +349,7 @@ NSString * const keyCaptchaError = @"error";
         theSession = self.theServiceDictionary[theTaskKey];
     }
     NSString *theLoadUrlString = [NSString stringWithFormat:@"%@audio.search?q=%@&search_own=0&auto_complete=1&count=%zd&offset=%zd&access_token=%@&v=5.50",HOST_NAME_CONSTANT, theSearchString, theCount, theOffset, theAccessTokenString];
-//    NSLog(@"%@", theLoadUrlString);
+    //    NSLog(@"%@", theLoadUrlString);
     NSURL *theNSURL = [NSURL URLWithString:[theLoadUrlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
     [theSession methodStartDownloadTaskWithURL:theNSURL
                                  progressBlock:nil
@@ -461,7 +488,7 @@ NSString * const keyCaptchaError = @"error";
                            theNewSong = [Song methodInitWithDictionary:theDictionary];
                            [theNewSongArray addObject:theNewSong];
                        }
-                    }
+                   }
                    if ([[DataManager sharedInstance].managedObjectContext hasChanges])
                    {
                        [[DataManager sharedInstance].managedObjectContext save:nil];
@@ -499,7 +526,7 @@ NSString * const keyCaptchaError = @"error";
      {
          if (!theError)
          {
-
+             
              theCompletionBlock(nil);
          }
          else
